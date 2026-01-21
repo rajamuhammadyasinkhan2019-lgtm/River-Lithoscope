@@ -1,0 +1,8 @@
+{
+  "name": "RIVERLITHOSCOPE",
+  "description": "Advanced AI-powered geological assistant specialized in riverine, fluvial, and drainage-controlled geology. Analyze riverbed boulders, minerals, and fossils with Gemini 3 Flash.",
+  "requestFramePermissions": [
+    "camera",
+    "geolocation"
+  ]
+}
