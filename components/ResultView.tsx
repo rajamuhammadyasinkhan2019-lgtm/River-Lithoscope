@@ -1,6 +1,23 @@
 
 import React, { useState } from 'react';
-import { AlertCircle, CheckCircle2, MapPin, Pickaxe, History, Info, BarChart3, ChevronDown, ChevronUp, Terminal, Split, Layout as LayoutIcon, TextSelect, Microscope } from 'lucide-react';
+import { 
+  AlertCircle, 
+  CheckCircle2, 
+  MapPin, 
+  Pickaxe, 
+  History, 
+  Info, 
+  BarChart3, 
+  ChevronDown, 
+  ChevronUp, 
+  Terminal, 
+  Split, 
+  Layout as LayoutIcon, 
+  TextSelect, 
+  Microscope, 
+  BookOpen,
+  Download
+} from 'lucide-react';
 
 interface Props {
   content: string;
@@ -42,32 +59,54 @@ export const ResultView: React.FC<Props> = ({ content, comparisonContent, manual
     "Exploration Recommendations"
   ];
 
+  const handleDownload = () => {
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const fileName = `riverlithoscope-analysis-${timestamp}.txt`;
+    const blob = new Blob([content], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
-      {/* Manual Logs Display */}
-      {manualLog && (
-        <div className="stone-card rounded-2xl p-6 border-l-4 border-l-blue-400 bg-blue-500/5">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-bold text-blue-400 uppercase tracking-widest flex items-center gap-2">
-              <TextSelect size={16} /> Field Notebook Entry
+      {/* Manual Logs Display - Enhanced "Field Book" Style */}
+      {(manualLog?.textureNotes || manualLog?.mineralObservations || manualLog?.gps) && (
+        <div className="stone-card rounded-2xl overflow-hidden border-l-4 border-l-emerald-500 shadow-lg">
+          <div className="bg-slate-800/50 px-6 py-3 flex items-center justify-between border-b border-slate-700/50">
+            <h3 className="text-xs font-bold text-emerald-400 uppercase tracking-widest flex items-center gap-2">
+              <BookOpen size={14} /> Field Notebook Corroboration
             </h3>
             {manualLog.gps && (
-              <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-400/10 border border-blue-400/20 text-[10px] font-bold text-blue-300">
-                <MapPin size={10} /> {manualLog.gps.lat.toFixed(4)}, {manualLog.gps.lng.toFixed(4)}
+              <div className="flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-slate-900 border border-slate-700 text-[9px] font-mono text-slate-400">
+                <MapPin size={10} className="text-rose-400" /> {manualLog.gps.lat.toFixed(5)}, {manualLog.gps.lng.toFixed(5)}
               </div>
             )}
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6 bg-slate-900/30">
             {manualLog.textureNotes && (
-              <div className="space-y-1.5">
-                <p className="text-[10px] font-bold text-slate-500 uppercase">Field Texture Notes</p>
-                <p className="text-sm text-slate-300 italic">"{manualLog.textureNotes}"</p>
+              <div className="space-y-2">
+                <p className="text-[10px] font-black text-slate-500 uppercase tracking-tight flex items-center gap-1.5">
+                  <TextSelect size={12} /> Logged Texture
+                </p>
+                <p className="text-sm text-slate-300 font-medium leading-relaxed italic border-l-2 border-slate-700 pl-3 py-1">
+                  "{manualLog.textureNotes}"
+                </p>
               </div>
             )}
             {manualLog.mineralObservations && (
-              <div className="space-y-1.5">
-                <p className="text-[10px] font-bold text-slate-500 uppercase">Mineral Observations</p>
-                <p className="text-sm text-slate-300 italic">"{manualLog.mineralObservations}"</p>
+              <div className="space-y-2">
+                <p className="text-[10px] font-black text-slate-500 uppercase tracking-tight flex items-center gap-1.5">
+                  <Microscope size={12} /> Logged Observations
+                </p>
+                <p className="text-sm text-slate-300 font-medium leading-relaxed italic border-l-2 border-slate-700 pl-3 py-1">
+                  "{manualLog.mineralObservations}"
+                </p>
               </div>
             )}
           </div>
@@ -154,16 +193,25 @@ export const ResultView: React.FC<Props> = ({ content, comparisonContent, manual
       </div>
 
       <div className="stone-card rounded-2xl overflow-hidden border-slate-700/50">
-        <button 
-          onClick={() => setIsRawExpanded(!isRawExpanded)}
-          className="w-full flex items-center justify-between p-4 hover:bg-slate-800/50 transition-colors group"
-        >
-          <div className="flex items-center gap-3">
+        <div className="flex items-center justify-between p-4 hover:bg-slate-800/5 transition-colors">
+          <button 
+            onClick={() => setIsRawExpanded(!isRawExpanded)}
+            className="flex flex-1 items-center gap-3 text-left group"
+          >
             <Terminal size={18} className="text-slate-500 group-hover:text-emerald-400 transition-colors" />
             <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Full Intelligence Data Stream</span>
-          </div>
-          {isRawExpanded ? <ChevronUp size={18} className="text-slate-500" /> : <ChevronDown size={18} className="text-slate-500" />}
-        </button>
+            {isRawExpanded ? <ChevronUp size={18} className="text-slate-500" /> : <ChevronDown size={18} className="text-slate-500" />}
+          </button>
+          
+          <button
+            onClick={handleDownload}
+            className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-[10px] font-bold text-emerald-400 hover:bg-emerald-500/20 transition-all"
+            title="Download Raw Analysis"
+          >
+            <Download size={12} />
+            Export TXT
+          </button>
+        </div>
         
         {isRawExpanded && (
           <div className="p-4 pt-0 border-t border-slate-800/50 animate-in slide-in-from-top-2 duration-200">

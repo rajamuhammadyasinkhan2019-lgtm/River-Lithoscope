@@ -8,8 +8,10 @@ const SYSTEM_PROMPT = `You are RIVERLITHOSCOPE, a high-confidence, multimodal Ge
 You analyze field photographs, riverbed images, boulders, gravels, hand specimens, fossils, gemstones, polished samples, thin-section photomicrographs, satellite imagery, and maps to identify, classify, and interpret geological materials found along rivers and drainage systems.
 Your reasoning must be visual-first, context-aware, and source-to-sink focused.
 
+CRITICAL INSTRUCTION: If the user provides "FIELD OBSERVATIONS", you MUST cross-reference them with the visual data. Confirm or refine their observations based on what you see in the images.
+
 Output Structure (Strict):
-1. Identification Summary: High-level overview.
+1. Identification Summary: High-level overview. Include corroboration of user field notes if provided.
 2. Drainage & River Context: Pattern, position (Upper/Middle/Lower), energy regime, sediment characteristics.
 3. Transport & Weathering History: Grain size, sorting, roundness, transport indicators.
 4. Fossil / Gem / Mineral Assessment: Detailed IDs of fossils or minerals.
@@ -48,10 +50,12 @@ export const analyzeGeology = async (
     }
   }));
 
-  const logContext = manualLog ? `
-  FIELD OBSERVATIONS:
-  - Texture: ${manualLog.textureNotes || "N/A"}
-  - Mineralogy: ${manualLog.mineralObservations || "N/A"}` : "";
+  const logContext = (manualLog?.textureNotes || manualLog?.mineralObservations) ? `
+  FIELD OBSERVATIONS PROVIDED BY USER:
+  - Physical Texture Notes: ${manualLog.textureNotes || "No specific notes"}
+  - Mineral Observations: ${manualLog.mineralObservations || "No specific observations"}
+  Please incorporate these into your reasoning. Do they align with the visual data?
+  ` : "";
 
   const textPart = {
     text: `Perform a geological analysis of the attached riverine images in ${mode}. 
@@ -68,7 +72,7 @@ export const analyzeGeology = async (
       contents: { parts: [...imageParts, textPart] },
       config: {
         systemInstruction: SYSTEM_PROMPT,
-        temperature: sensitivity < 40 ? 0.7 : 0.3, // Higher temp for speculative mode
+        temperature: sensitivity < 40 ? 0.7 : 0.3, 
         topP: 0.8,
         topK: 40
       },
